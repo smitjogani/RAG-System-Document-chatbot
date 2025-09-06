@@ -1,0 +1,112 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.YoutubeLoader = void 0;
+const youtubei_js_1 = require("youtubei.js");
+const documents_1 = require("@langchain/core/documents");
+const base_1 = require("@langchain/core/document_loaders/base");
+/**
+ * A document loader for loading data from YouTube videos. It uses the
+ * youtubei.js library to fetch the transcript and video metadata.
+ * @example
+ * ```typescript
+ * const loader = new YoutubeLoader(
+ *   "https:
+ *   "en",
+ *   true,
+ * );
+ * const docs = await loader.load();
+ * ```
+ */
+class YoutubeLoader extends base_1.BaseDocumentLoader {
+    constructor(config) {
+        super();
+        Object.defineProperty(this, "videoId", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "language", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "addVideoInfo", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        this.videoId = config.videoId;
+        this.language = config?.language;
+        this.addVideoInfo = config?.addVideoInfo ?? false;
+    }
+    /**
+     * Extracts the videoId from a YouTube video URL.
+     * @param url The URL of the YouTube video.
+     * @returns The videoId of the YouTube video.
+     */
+    static getVideoID(url) {
+        const match = url.match(/.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/);
+        if (match !== null && match[1].length === 11) {
+            return match[1];
+        }
+        else {
+            throw new Error("Failed to get youtube video id from the url");
+        }
+    }
+    /**
+     * Creates a new instance of the YoutubeLoader class from a YouTube video
+     * URL.
+     * @param url The URL of the YouTube video.
+     * @param config Optional configuration options for the YoutubeLoader instance, excluding the videoId.
+     * @returns A new instance of the YoutubeLoader class.
+     */
+    static createFromUrl(url, config) {
+        const videoId = YoutubeLoader.getVideoID(url);
+        return new YoutubeLoader({ ...config, videoId });
+    }
+    /**
+     * Loads the transcript and video metadata from the specified YouTube
+     * video. It uses the youtubei.js library to fetch the video metadata and transcripts.
+     * @returns An array of Documents representing the retrieved data.
+     */
+    async load() {
+        let transcript;
+        const metadata = {
+            source: this.videoId,
+        };
+        try {
+            const youtube = await youtubei_js_1.Innertube.create({
+                lang: this.language,
+                retrieve_player: false,
+            });
+            const info = await youtube.getInfo(this.videoId);
+            const transcriptData = await info.getTranscript();
+            transcript =
+                transcriptData.transcript.content?.body?.initial_segments
+                    .map((segment) => segment.snippet.text)
+                    .join(" ") ?? "";
+            if (transcript === undefined) {
+                throw new Error("Transcription not found");
+            }
+            if (this.addVideoInfo) {
+                const basicInfo = info.basic_info;
+                metadata.description = basicInfo.short_description;
+                metadata.title = basicInfo.title;
+                metadata.view_count = basicInfo.view_count;
+                metadata.author = basicInfo.author;
+            }
+        }
+        catch (e) {
+            throw new Error(`Failed to get YouTube video transcription: ${e.message}`);
+        }
+        const document = new documents_1.Document({
+            pageContent: transcript,
+            metadata,
+        });
+        return [document];
+    }
+}
+exports.YoutubeLoader = YoutubeLoader;
