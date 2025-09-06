@@ -1,3 +1,8 @@
+# DEMO UI : 
+
+https://github.com/user-attachments/assets/ea874943-44f1-4b7c-a33f-6e1d9c0deb6e
+
+
 # DocuMind — RAG Proof of Concept
 
 DocuMind is a compact, production-minded Retrieval-Augmented Generation (RAG) proof-of-concept for chatting with documents (PDF & JSON). It includes a Node.js backend (LangChain helpers + Pinecone) and a React frontend (Vite) for uploading documents, indexing them as vectors, and running context-constrained Q&A using Google Gemini.
