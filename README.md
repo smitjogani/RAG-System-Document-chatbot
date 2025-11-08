@@ -108,41 +108,6 @@ The code performs validation so empty or mismatched-dimensional vectors are reje
 
 ---
 
-## Common issues & troubleshooting
-
-1. Generative Language API disabled / 403 SERVICE_DISABLED
-
-Symptom:
-
-```
-GoogleGenerativeAIFetchError: ... Generative Language API has not been used in project ... or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/generativelanguage.googleapis.com/overview?project=YOUR_PROJECT_ID
-```
-
-Fix:
-
-- Open the provided activation URL in the error and enable the **Generative Language API** for the Google Cloud project linked to your key.
-- Wait a few minutes after enabling and retry.
-- Ensure `GEMINI_API_KEY` is pointing to the same project credentials.
-
-2. Pinecone dimension mismatch: `Vector dimension 0 does not match the dimension of the index 1024`
-
-Symptom:
-
-- Embeddings returned empty arrays or a vector length that doesn't match the Pinecone index dimension.
-
-Fix:
-
-- Confirm `PINECONE_INDEX_NAME` and open the Pinecone console to verify the index `dimension`.
-- Set `PINECONE_INDEX_DIM` in `.env` to the index dimension for local validation.
-- Ensure embeddings are non-empty before upserting (the repo includes validation).
-- If needed, recreate the Pinecone index with the matching dimension or switch to an embedding model that returns the required size.
-
-3. Other tips
-
-- If embedding calls fail repeatedly, check network, API key, and that billing/quotas are enabled for the Google project.
-- To reduce risk, consider adding provider fallback (OpenAI embeddings) or a local embedding service.
-
----
 
 ## Development notes & extension ideas
 
@@ -156,19 +121,3 @@ Fix:
 
 - Open issues for bugs or feature requests.
 - Send PRs to the appropriate `versionX` folder with clear scope — `version5` is the current target for improvements.
-
----
-
-## License
-
-This project is provided as-is for demonstration. Add a proper `LICENSE` file to apply an open-source license.
-
----
-
-If you'd like, I can also:
-
-- add a project-level `package.json` and `start` script that boots both backend and frontend together for easier local demos,
-- add a `README` inside `Backend/version5` that documents the server APIs and expected request/response shapes,
-- or create a short GIF demo and text snippet for LinkedIn.
-
-Tell me which one you'd like next.
